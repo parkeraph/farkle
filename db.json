@@ -35,6 +35,18 @@
       "date": "2022-1-17T17:30:31.098Z",
       "important": false,
       "id": 6
+    },
+    {
+      "content": "testing from vue 3",
+      "date": "1651867963431",
+      "important": false,
+      "id": 7
+    },
+    {
+      "content": "test 2",
+      "date": "1651868127412",
+      "important": false,
+      "id": 8
     }
   ]
 }

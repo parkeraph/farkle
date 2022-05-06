@@ -4,45 +4,46 @@ import axios from 'axios';
 
 const url: string = 'http://localhost:3001/notes'
 
-interface IUseNoteServiceGetAllRefs {
-    notes: Ref<INote[]>,
-    error: Ref<unknown>,
-    isLoading: Ref<Boolean>,
-    fetch: Function
-}
-
-const useNoteServiceGetAll = () : IUseNoteServiceGetAllRefs => {
+const useNoteService = () => {
     const notes = ref<INote[]>([]);
-    const error = ref<unknown>('');
+    const error = ref<String>('');
     const isLoading = ref<boolean>(false);
 
-    const fetch = async () => {
+    const getAllNotes = async () => {
         isLoading.value = true;
         try{
-            const resp = await axios.get(url);
+            const resp = await axios.get<INote[]>(url);
             notes.value = resp.data;
         }catch(ex){
-            error.value = ex;
+            error.value = String(ex);
         }finally{
             isLoading.value = false;
         }
     }
-    
+
+    const createNote = async (newNote: INote) => {
+        isLoading.value = true;
+        try{
+            const res = await axios.post(url, newNote);
+            console.log(res);
+        }catch(e){
+            console.error(e);
+            error.value = String(e);
+        }finally{
+            isLoading.value = false;
+        }
+    }
+
     return {
         notes,
         error,
         isLoading,
-        fetch: fetch
+        getAllNotes,
+        createNote
     }
 
 } 
 
-const useNoteSevicePost = (newNote: INote) => {
-
-}
-
 export {
-    IUseNoteServiceGetAllRefs,
-    useNoteServiceGetAll,
-    useNoteSevicePost
+    useNoteService
 }
