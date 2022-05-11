@@ -10,7 +10,7 @@
       "id": 2,
       "content": "Browser can execute only JavaScript",
       "date": "2022-1-17T18:39:34.091Z",
-      "important": true
+      "important": false
     },
     {
       "id": 3,
@@ -22,7 +22,7 @@
       "id": 4,
       "content": "a new note...",
       "date": "2022-04-04T21:04:58.402Z",
-      "important": false
+      "important": true
     },
     {
       "id": 5,
@@ -45,8 +45,26 @@
     {
       "content": "test 2",
       "date": "1651868127412",
-      "important": false,
+      "important": true,
       "id": 8
+    },
+    {
+      "content": "test 3",
+      "date": "1652217802296",
+      "important": true,
+      "id": 9
+    },
+    {
+      "content": "asdfasdf",
+      "date": "1652223288843",
+      "important": true,
+      "id": 10
+    },
+    {
+      "content": "fdsafdsa",
+      "date": "1652223334445",
+      "important": false,
+      "id": 11
     }
   ]
 }
