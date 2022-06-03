@@ -63,6 +63,7 @@ import IPlayer from '../types/player';
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        flex-wrap: wrap;
         border-bottom-style: solid;
         border-bottom-width: .1em;
         border-block-color: grey;
@@ -72,7 +73,7 @@ import IPlayer from '../types/player';
         display: flex;
         flex-direction: row;
         justify-content:center;
-        padding: 1em
+        padding-top: 1em;
     }
 
     .player-card-label {
@@ -100,13 +101,20 @@ import IPlayer from '../types/player';
 
     @media (max-width: 750px){
         .player-selection-card {
-        padding: 1em;
-        width: 100%;
-        margin: auto auto
+            padding: 1em;
+            width: 100%;
+            margin: auto auto
+        }
+        .player-card-label {
+            font-size:large; 
+            margin-right: 1em
+        }
     }
-    .player-card-label {
-        font-size:large; 
-        margin-right: 1em
-    }
+
+    @media (max-width: 400px) {
+        .player-card-input-text {
+            width: 120%
+        }
+
     }
 </style>

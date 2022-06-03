@@ -6,7 +6,6 @@
     "serve": "vite preview",
     "build": "vite build",
     "dev": "vite --host",
-    "start": "vite",
     "preview": "vite preview"
   },
   "dependencies": {

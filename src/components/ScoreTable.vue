@@ -71,7 +71,7 @@
             <tr>
               <td>{{ currentRound }}.</td>
               <td v-for="player in players" :key="player.playerId">
-                <input class="farkleScoreInput"  @input="event => handlePointChange(player.playerId, event.target.value)" />
+                <input class="farkleScoreInput" inputmode="numeric"  @input="event => handlePointChange(player.playerId, event.target.value)" />
               </td>
              
             </tr>
