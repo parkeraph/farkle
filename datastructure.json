@@ -1,0 +1,52 @@
+[
+    {
+        "gameName": "firstGame",
+        "currentRound": 2,
+        "players": [
+            {
+                "playerId": 0,
+                "name": "parker"
+            },
+            {
+                "playerId": 1,
+                "name": "abby"
+            },
+            {
+                "playerId": 2,
+                "name": "whiskey"
+            }
+        ],
+        "plays": [
+            {
+                "roundNumber": 0,
+                "playerId": 0,
+                "points": 100
+            },
+            {
+                "roundNumber": 0,
+                "playerId": 1,
+                "points": 250
+            },
+            {
+                "roundNumber": 0,
+                "playerId": 2,
+                "points": 150
+            },
+            {
+                "roundNumber": 1,
+                "playerId": 0,
+                "points": 250
+            },
+            {
+                "roundNumber": 1,
+                "playerId": 1,
+                "points": 175
+            },
+            {
+                "roundNumber": 1,
+                "playerId": 2,
+                "points": 350
+            }
+        ]
+    }
+]
