@@ -1,5 +1,7 @@
-import * as noteService from './noteService'
+import { getGame, createNewGame, updateGame } from './firebase'
 
 export {
-    noteService
+    getGame, 
+    createNewGame,
+    updateGame
 }

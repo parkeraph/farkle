@@ -1,7 +1,8 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import useFarkleState from '../composables/useFarkleState';
-import IPlayer from '../types/player';
+    import IPlayer from '../types/player';
+    import { createNewGame } from '../api/';
     
     const { players, addPlayers, startGame } = useFarkleState();
 
@@ -16,9 +17,12 @@ import IPlayer from '../types/player';
         playerInputs.value.push({playerId: playerInputs.value.length, name: ''});
     }
 
-    const handleStartGame = () => {
+    const handleStartGame = async () => {
         addPlayers(playerInputs.value);
-        startGame();
+        const key = await createNewGame(players.value);
+        if(key){
+            startGame(key);
+        }
     }
 
 </script>

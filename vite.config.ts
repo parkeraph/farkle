@@ -13,6 +13,7 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
+  envPrefix: "FB_",
   define: { 'process.env': {} },
   resolve: {
     alias: {
