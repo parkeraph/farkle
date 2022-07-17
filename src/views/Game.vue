@@ -1,24 +1,51 @@
 <script setup lang="ts">
-  import { ref, computed, unref, toRaw} from 'vue';
-  import useFarkleState from '../composables/useFarkleState';
-  import IPlay from '../types/play';
-  import { updateGame } from '../api';
+    import  ScoreBoard from '../components/ScoreBoard.vue';
+    import useFarkleState from '../composables/useFarkleState';
+    import IPlay from '../types/play';
+    import { ref, computed, unref, toRaw, onMounted} from 'vue';
+    import { getGame } from '../api'
+    import { updateGame } from '../api';
+    import { useRoute, useRouter } from 'vue-router';
 
-  const {gameKey, players, playInputs, plays, currentRound, nextRound} = useFarkleState();
+    const {gameKey, players, playInputs, plays, currentRound, nextRound, loadGame} = useFarkleState();
+    const route = useRoute();
+    const router = useRouter();
 
+    onMounted(async () => {
+        
+        console.info("Loading game key: ", route.params.gameKey);
+        const gameKey = String(route.params.gameKey);
+        
+        try {
+            //TODO: gove firebase api call to composable
+            const loadedGame = await getGame(gameKey);
+            loadGame(gameKey, loadedGame.currentRound, loadedGame.players, loadedGame.plays, loadedGame.acceptingController);
+        } catch (e) {
+            router.push({name: 'gameNotFound'})
+        }
+            
+        
+    })
 
-  const playsByRound = computed(() => {
-    let rounds: Array<{roundNumber: number, plays: IPlay[]}> = [];
+    const playsByRound = computed(() => {
+        
+        if(plays.value){
+            let rounds: Array<{roundNumber: number, plays: IPlay[]}> = [];
 
-    for(let i = 0; i < currentRound.value; i++){
-      const roundPlays = plays.value.filter(play => play.roundNumber == i)
-      
-      rounds.push({plays: roundPlays, roundNumber: i})
-    }
-    return rounds
-  })
+            for(let i = 0; i < currentRound.value; i++){
+                const roundPlays = plays.value.filter(play => play.roundNumber == i)
+                
+                rounds.push({plays: roundPlays, roundNumber: i})
+            }
 
-  const handlePointChange = (playerId: number, newPointValue: string) => {
+            return rounds
+        } else {
+            return [];
+        }
+        
+    })
+
+    const handlePointChange = (playerId: number, newPointValue: string) => {
         
         playInputs.value = playInputs.value.map((playInput) => {
             if(playInput.playerId === playerId) {
@@ -27,27 +54,31 @@
                 return playInput
             }
         })
-  }
-
-  const resetInputs = () => {
-    for(let i = 0; i < document.getElementsByClassName("scoreInput").length; i++){
-      document.getElementsByClassName("scoreInput")[i].value = ""
     }
-  }
 
-  const handleNextRoundClick = async () => {
-    resetInputs();
-    nextRound();
-    
-    if(gameKey.value) {
-      await updateGame(gameKey.value, currentRound.value, players.value, plays.value);
+    const resetInputs = () => {
+        for(let i = 0; i < document.getElementsByClassName("scoreInput").length; i++){
+            document.getElementsByClassName("scoreInput")[i].value = ""
+        }
     }
-  }
+
+    const handleNextRoundClick = async () => {
+        resetInputs();
+        nextRound();
+
+        if(gameKey.value) {
+            await updateGame(gameKey.value, currentRound.value, players.value, plays.value);
+        }
+    }
 
 </script>
 
 
 <template>
+    <v-container>
+      <div v-if="currentRound > 1"> 
+            <ScoreBoard></ScoreBoard>
+      </div>  
       <div id="tableWrapper">
           <v-table 
             theme="light" 
@@ -98,6 +129,7 @@
           <v-btn class="gameControlItem" @click="handleNextRoundClick">Next Round</v-btn>
         </div>
       </div>
+    </v-container>
         
 </template>
 
@@ -105,7 +137,7 @@
 
   #tableWrapper {
     width:80%;
-    margin: 0 auto 0 auto;
+    margin: 2em auto 0 auto;
   }
 
   @media screen and (max-width: 600px) {

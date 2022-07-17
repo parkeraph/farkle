@@ -1,10 +1,16 @@
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { ref, onMounted } from 'vue';
     import useFarkleState from '../composables/useFarkleState';
     import IPlayer from '../types/player';
     import { createNewGame } from '../api/';
+    import { useRouter } from 'vue-router';
     
-    const { players, addPlayers, startGame } = useFarkleState();
+    const { players, addPlayers, startGame, reset } = useFarkleState();
+    const router = useRouter();
+
+    onMounted(() => {
+        reset();
+    })
 
     const playerInputs = ref<IPlayer[]>([{playerId: 0, name: ''}]);
     
@@ -21,7 +27,7 @@
         addPlayers(playerInputs.value);
         const key = await createNewGame(players.value);
         if(key){
-            startGame(key);
+            router.push(`/game/${key}`)
         }
     }
 

@@ -1,7 +1,8 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { getDatabase, ref, Database, get, child, set, push } from "firebase/database";
+import { getDatabase, ref, Database, get, child, set, push, onValue, update } from "firebase/database";
 import IPlay from '../types/play';
 import IPlayer from '../types/player';
+import useFarkleState from '../composables/useFarkleState'
 
 let app : FirebaseApp ;
 let database : Database ;
@@ -70,7 +71,8 @@ const createNewGame = async (newPlayers: IPlayer[] ) => {
         set(newPostRef, {
             currentRound: 1,
             players: newPlayers,
-            plays: []
+            plays: placeholderPlays,
+            acceptingController: false
         });
 
         return newPostRef.key;
@@ -83,15 +85,83 @@ const updateGame = async (gameKey: string,  newCurrentRound: number, newPlayers:
     try {
         const gameRef = ref(await getRealtimeDatabase(), `games/${gameKey}`);
 
-        set(gameRef, {
-            currentRound: newCurrentRound,
-            players: newPlayers,
-            plays: newPlays
-        })
+        const updates = {
+            '/currentRound/': newCurrentRound,
+            '/players/': newPlayers,
+            '/plays/': newPlays
+        }
+
+        update(gameRef, updates)
 
     } catch (e) {
         throw e
     }
 }
 
-export { getGame, createNewGame, updateGame }
+const updateGameAcceptingControllerState = async (gameKey: string, newValue: boolean) => {
+    try {
+        const gameRef = ref(await getRealtimeDatabase(), `games/${gameKey}`);
+
+        const updates = {
+            '/acceptingController/': newValue
+        };
+
+        await update(gameRef, updates)
+
+    } catch (e) {
+        throw e
+    }
+}
+
+
+const listenForControllerConnect = async (gameKey: string) => {
+    try {
+        
+        const gameAcceptingControllerRef = ref(await getRealtimeDatabase(), `games/${gameKey}/acceptingController`);
+
+        onValue(gameAcceptingControllerRef, (snapshot) => {
+            const data = snapshot.val();
+            console.log("sdfa", data);
+            return data
+        });
+
+    } catch (e) {
+        throw e
+    }
+}
+
+const getGameAcceptingControllerState = async (gameKey: string) => {
+    try {
+        const dbRef = ref(await getRealtimeDatabase(), `games/${gameKey}/acceptingController`);
+        const snapshot = await get(dbRef);
+
+        if(snapshot.exists()){
+            return snapshot.val();
+        }
+
+    } catch (e){
+        console.error(e)
+        throw e
+    }
+}
+
+//TODO: remove url hardcodings
+const getAppBaseRoute = () => {
+    if(import.meta.env.PROD){
+      return 'https://farkle-248b4.web.app';
+    } else {
+       return 'http://192.168.0.86:3000/'
+    }
+}
+
+
+export { 
+    getRealtimeDatabase,
+    getGame,
+    createNewGame,
+    updateGame,
+    getAppBaseRoute,
+    listenForControllerConnect, 
+    updateGameAcceptingControllerState,
+    getGameAcceptingControllerState
+}

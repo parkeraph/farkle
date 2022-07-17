@@ -1,7 +1,12 @@
-import { getGame, createNewGame, updateGame } from './firebase'
+import { getRealtimeDatabase, getGame, createNewGame, updateGame, getAppBaseRoute, listenForControllerConnect, updateGameAcceptingControllerState, getGameAcceptingControllerState } from './firebase'
 
 export {
+    getRealtimeDatabase,
     getGame, 
     createNewGame,
-    updateGame
+    updateGame,
+    getAppBaseRoute,
+    listenForControllerConnect,
+    updateGameAcceptingControllerState,
+    getGameAcceptingControllerState
 }

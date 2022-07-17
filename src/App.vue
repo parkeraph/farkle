@@ -1,28 +1,50 @@
 <script setup lang="ts">
-  import PlayerSelection from './components/PlayerSelection.vue';
-  import ScoreTable from './components/ScoreTable.vue';
   import useFarkleState from './composables/useFarkleState';
-  import ScoreBoard from './components/ScoreBoard.vue';
-  import { getGame } from './api';
-  import { ref, computed } from 'vue';
+  import { getGame, getAppBaseRoute } from './api';
+  import { ref, watch } from 'vue';
+  import { useRouter } from 'vue-router';
+  import QRCode from 'qrcode';
 
-  const { currentRound, gameKey, loadGame } = useFarkleState();
+  const { currentRound, gameKey, loadGame, startScoreboardMode, scoreboardMode } = useFarkleState();
+  const router = useRouter();
 
   const loadGameModalOpen = ref<boolean>(false);
   const loadGameKeyInput = ref<string>('');
   const loadGameError = ref<string>('');
   const isLoadGameError = ref<boolean>(false);
-  const gameKeyModalOpen = ref<boolean>(false);
+  const gameOptionsModalOpen = ref<boolean>(false);
+  const showGameQRCodeCanvas = ref<boolean>(false);
+
+  watch(scoreboardMode, (newState, oldState) => {
+    if(newState) { 
+      router.push({name: 'scoreboard'}) 
+      gameOptionsModalOpen.value = false;
+    }
+  });
 
   const handleLoadGameButtonClick = async () => {
+    //if getGame does not throw an error, then load it on game route
     try {
-      const loadedGame = await getGame(loadGameKeyInput.value);
+      await getGame(loadGameKeyInput.value);
       loadGameModalOpen.value = false;
-      loadGame(loadGameKeyInput.value, loadedGame.currentRound, loadedGame.players, loadedGame.plays);
+      router.push(`/game/${loadGameKeyInput.value}`)
     } catch (e) {
       isLoadGameError.value = true;
       loadGameError.value = String(e);
-    } 
+    }
+  }
+
+  const goHome = () => {
+    router.push({name: 'home'});
+  }
+
+  const handleScoreboardModeClicked = async () => {
+
+      const canvas = document.getElementById("qrCanvas");
+      showGameQRCodeCanvas.value = true;
+      startScoreboardMode();
+      QRCode.toCanvas(canvas, getAppBaseRoute()+`/game/${gameKey.value}`)
+    
   }
 
 </script>
@@ -30,27 +52,19 @@
 <template>
   <v-app>
     <v-main>
+      
       <!--navbar-->
       <v-toolbar>
-        <v-toolbar-title>Farkle</v-toolbar-title>
+        <v-toolbar-title @click="goHome">Farkle</v-toolbar-title>
         <v-toolbar-items >
          <v-btn v-if="currentRound === 0" @click="loadGameModalOpen = true">Load Game</v-btn>
-         <v-btn v-else @click="gameKeyModalOpen = true">View Game Code</v-btn>
+         <v-btn v-else @click="gameOptionsModalOpen = true">Game Options</v-btn>
         </v-toolbar-items>
       </v-toolbar>
       
-      <!--Player Configuration View-->
-      <v-container v-if="currentRound === 0">
-        <player-selection />
-      </v-container>
-      
-      <!--Game View-->
-      <v-container v-else>
-        <div v-if="currentRound > 1">
-        <score-board />
-          </div>
-       <score-table />
-      </v-container>
+      <div class="viewContainer">
+        <router-view/>
+      </div>
 
       <!--Load Game Modal-->
       <v-dialog
@@ -93,25 +107,45 @@
       </v-card>
       </v-dialog>
 
-      <!--Game Key Modal-->
+      <!--Game Options Modal-->
       <v-dialog
-        v-model="gameKeyModalOpen"
+        v-model="gameOptionsModalOpen"
         max-width="1000"
         max-height="500"
       >
         <v-card>
         <v-card-title>
-          <span class="text-h5">Game Key</span>
+          <span class="text-h5">Game Options</span>
         </v-card-title>
         
-        <v-card-text>
-          {{gameKey}}  
-        </v-card-text>
+          <v-card-text>
+            Game Key: {{gameKey}}  
+          </v-card-text>
+
+          <div class="modalContent">
+            <v-btn 
+              @click="handleScoreboardModeClicked"
+              style="margin: 1em 2em 0em 2em"
+            >
+              ScoreBoard Mode
+            </v-btn>
+
+            <canvas v-show="showGameQRCodeCanvas" id="qrCanvas">
+
+            </canvas>
+
+            <v-btn 
+              @click="goHome" 
+              style="margin: 1em 2em 1em 2em"
+            >
+              Exit Game
+            </v-btn>
+          </div>
 
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            @click="gameKeyModalOpen = false"
+            @click="gameOptionsModalOpen = false"
             color="primary"
             :dark="true"
           >
@@ -129,4 +163,17 @@
  .loadGameError {
     color: red;
  }
+ .viewContainer {
+  margin-top: 1em
+ }
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+}
+
+#qrCanvas {
+  margin: 0 auto 0 auto;
+}
+
 </style>
