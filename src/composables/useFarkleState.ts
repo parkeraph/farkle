@@ -2,8 +2,8 @@ import { ref, computed } from 'vue'
 import IPlay from '../types/play';
 import IPlayer from '../types/player'
 import IRound from '../types/round';
-import { ref as fbRef, onValue } from "firebase/database";
-import { getRealtimeDatabase, updateGameAcceptingControllerState, getGameAcceptingControllerState } from '../api'
+import { ref as fbRef, onValue, off } from "firebase/database";
+import { getRealtimeDatabase, updateGameAcceptingControllerState, getGame } from '../api'
 
 
 const players = ref<IPlayer[]>([]);
@@ -11,7 +11,7 @@ const plays = ref<IPlay[]>([]);
 const playInputs = ref<IPlay[]>([]);
 const currentRound = ref(0);
 const gameKey = ref<string>();
-const scoreboardMode = ref<boolean>(false);
+const jumbotronMode = ref<boolean>(false);
 const error = ref('');
 
 const useFarkleState = () => {
@@ -91,7 +91,7 @@ const useFarkleState = () => {
         error.value = '';
     }
 
-    const startScoreboardMode = async () => {
+    const startJumbotronMode = async () => {
         if(gameKey.value){
             await updateGameAcceptingControllerState(gameKey.value, true)
             
@@ -101,23 +101,33 @@ const useFarkleState = () => {
                 const acceptingController = snapshot.val();
                 console.log(acceptingController)
                 if(!acceptingController){
-                    scoreboardMode.value = true
+                    jumbotronMode.value = true
+                    off(gameAcceptingControllerRef);
                 } 
             });
             
         }
     }
 
-    const signAsController = async () => {
-        if(gameKey.value){
-            const isAccepting = await getGameAcceptingControllerState(gameKey.value);
+    const listenForGameUpdates = async () => {
+        if(gameKey) {
+            const gameRef = fbRef(await getRealtimeDatabase(), `games/${gameKey.value}`);
 
-            if(isAccepting) {
-                await updateGameAcceptingControllerState(gameKey.value, false);
-            } else {
-                throw "Game is not available for a controller"
-            }
+            console.log("Listening for game updates..");
 
+            onValue(gameRef, (snapshot) => {
+                const newVal = snapshot.val();
+                console.log(newVal)
+                
+                if(newVal){
+                    if(newVal.currentRound && newVal.plays) {
+                        currentRound.value = newVal.currentRound;
+                        plays.value = newVal.plays
+                    } else {    
+                        throw "Error fetching game data"
+                    }
+                }
+            });
         }
     }
 
@@ -127,14 +137,14 @@ const useFarkleState = () => {
         currentRound,
         playInputs,
         gameKey,
-        scoreboardMode,
+        jumbotronMode,
         addPlayers,
         startGame,
         nextRound,
         loadGame,
         reset,
-        startScoreboardMode,
-        signAsController,
+        startJumbotronMode,
+        listenForGameUpdates,
         error
     })
 

@@ -5,7 +5,7 @@
   import { useRouter } from 'vue-router';
   import QRCode from 'qrcode';
 
-  const { currentRound, gameKey, loadGame, startScoreboardMode, scoreboardMode } = useFarkleState();
+  const { currentRound, gameKey, loadGame, startJumbotronMode, jumbotronMode } = useFarkleState();
   const router = useRouter();
 
   const loadGameModalOpen = ref<boolean>(false);
@@ -15,9 +15,9 @@
   const gameOptionsModalOpen = ref<boolean>(false);
   const showGameQRCodeCanvas = ref<boolean>(false);
 
-  watch(scoreboardMode, (newState, oldState) => {
+  watch(jumbotronMode, (newState, oldState) => {
     if(newState) { 
-      router.push({name: 'scoreboard'}) 
+      router.push({name: 'jumbotron'}) 
       gameOptionsModalOpen.value = false;
     }
   });
@@ -38,11 +38,11 @@
     router.push({name: 'home'});
   }
 
-  const handleScoreboardModeClicked = async () => {
+  const handleJumbotronModeClicked = async () => {
 
       const canvas = document.getElementById("qrCanvas");
       showGameQRCodeCanvas.value = true;
-      startScoreboardMode();
+      startJumbotronMode();
       QRCode.toCanvas(canvas, getAppBaseRoute()+`/game/${gameKey.value}`)
     
   }
@@ -124,10 +124,10 @@
 
           <div class="modalContent">
             <v-btn 
-              @click="handleScoreboardModeClicked"
+              @click="handleJumbotronModeClicked"
               style="margin: 1em 2em 0em 2em"
             >
-              ScoreBoard Mode
+              Jumbotron Mode
             </v-btn>
 
             <canvas v-show="showGameQRCodeCanvas" id="qrCanvas">
